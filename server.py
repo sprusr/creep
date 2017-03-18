@@ -27,12 +27,22 @@ def invite_pressure(token, mobile):
                     esendex.to(mobile).message("Nice that you're going to " + event["name"] + ", but why haven't you invited " + friend["name"] + "? Have you fallen out?").send()
             break
 
+def devices(token, mobile):
+    graph = GraphAPI(request.form.get("token"))
+    devices = graph.get_object("me?fields=devices")["devices"]
+    for device in devices:
+        print(device["hardware"])
+        if device["hardware"]:
+            esendex.to(mobile).message("Pretty cool that you own a " + device["hardware"] + ". Do you still use it much?").send()
+            break
+
 @app.route("/auth", methods=["POST"])
 def auth_post():
     graph = GraphAPI(request.form.get("token"))
     profile = graph.get_object("me")
     #esendex.to(request.form.get("mobile")).message("Hello, " + profile["name"] + ". I know a lot about you...").send()
-    invite_pressure(request.form.get("token"), request.form.get("mobile"))
+    #invite_pressure(request.form.get("token"), request.form.get("mobile"))
+    devices(request.form.get("token"), request.form.get("mobile"))
     return "HELP ME " + request.form.get("mobile") + " " + request.form.get("token")
 
 @app.route("/webhook", methods=["GET"])
