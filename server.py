@@ -2,6 +2,7 @@ from flask import Flask, request, json, render_template
 from facebook import GraphAPI
 import os
 
+# These need to be set as env vars
 FB_APP_ID = os.environ.get("FB_APP_ID")
 FB_APP_NAME = os.environ.get("FB_APP_NAME")
 FB_APP_SECRET = os.environ.get("FB_APP_SECRET")
@@ -24,7 +25,7 @@ def webhook_post():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", app_id=FB_APP_ID)
 
 if __name__ == "__main__":
     app.run(debug=True)
