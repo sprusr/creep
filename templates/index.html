@@ -19,7 +19,7 @@
             onlogin="handleLogin"></div>
         <script>
         function handleLogin(response) {
-            window.location = "https://sprusr.ngrok.io/auth?token=" + response.authResponse.accessToken + "&id=" + response.authResponse.userID;
+            window.location = "/auth?token=" + response.authResponse.accessToken + "&id=" + response.authResponse.userID;
         }
         </script>
     </body>
