@@ -4,6 +4,10 @@
         <title>Creep</title>
     </head>
     <body>
+        <form action="auth" method="post" id="form">
+            <input type="text" name="mobile" placeholder="Mobile number">
+            <input type="hidden" name="token" id="token">
+        </form>
         <div id="fb-root"></div>
         <script>
         (function(d, s, id) {
@@ -19,7 +23,8 @@
             onlogin="handleLogin"></div>
         <script>
         function handleLogin(response) {
-            window.location = "/auth?token=" + response.authResponse.accessToken + "&id=" + response.authResponse.userID;
+            document.getElementById("token").value = response.authResponse.accessToken;
+            document.getElementById("form").submit();
         }
         </script>
     </body>
