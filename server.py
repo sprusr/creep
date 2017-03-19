@@ -1,7 +1,8 @@
 from flask import Flask, request, json, render_template
 from facebook import GraphAPI
 from esendexer import Esendex
-import os, random, datetime
+from threading import Thread
+import os, random, datetime, time
 
 # These need to be set as env vars
 FB_APP_ID = os.environ.get("FB_APP_ID")
@@ -10,11 +11,10 @@ FB_APP_SECRET = os.environ.get("FB_APP_SECRET")
 
 app = Flask(__name__)
 esendex = Esendex(os.environ.get("ESENDEX_USERNAME"), os.environ.get("ESENDEX_PASSWORD"), os.environ.get("ESENDEX_ACCOUNT_REF"))
-
 esendex.from_string("Creep")
 
 def invite_pressure(token, mobile):
-    graph = GraphAPI(request.form.get("token"))
+    graph = GraphAPI(token)
     events = graph.get_object("me/events?fields=rsvp_status,name,attending,start_time")
     random.shuffle(events["data"])
     for event in events["data"]:
@@ -28,7 +28,7 @@ def invite_pressure(token, mobile):
             break
 
 def devices(token, mobile):
-    graph = GraphAPI(request.form.get("token"))
+    graph = GraphAPI(token)
     devices = graph.get_object("me?fields=devices")["devices"]
     for device in devices:
         print(device["hardware"])
@@ -36,13 +36,26 @@ def devices(token, mobile):
             esendex.to(mobile).message("Pretty cool that you own a " + device["hardware"] + ". Do you still use it much?").send()
             break
 
+functions = [invite_pressure, devices]
+
+class UpdateThread(Thread):
+    def __init__(self, token, mobile):
+        self.stopped = False
+        self.token = token
+        self.mobile = mobile
+        Thread.__init__(self)
+    def run(self):
+        while not self.stopped:
+            time.sleep(30)
+            random.choice(functions)(self.token, self.mobile)
+
 @app.route("/auth", methods=["POST"])
 def auth_post():
     graph = GraphAPI(request.form.get("token"))
     profile = graph.get_object("me")
-    #esendex.to(request.form.get("mobile")).message("Hello, " + profile["name"] + ". I know a lot about you...").send()
-    #invite_pressure(request.form.get("token"), request.form.get("mobile"))
-    devices(request.form.get("token"), request.form.get("mobile"))
+    esendex.to(request.form.get("mobile")).message("Hello, " + profile["name"] + ". I know a lot about you...").send()
+    thread = UpdateThread(request.form.get("token"), request.form.get("mobile"))
+    thread.start()
     return "HELP ME " + request.form.get("mobile") + " " + request.form.get("token")
 
 @app.route("/webhook", methods=["GET"])
