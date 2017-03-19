@@ -52,7 +52,11 @@ def translate(text, from_l, to_l):
     r = requests.get(url)
     return r.text
 
-functions = [invite_pressure, devices]
+def language(token, mobile):
+    update_languages(token, mobile)
+    print(LANGUAGES)    
+
+functions = [invite_pressure, devices, language]
 
 class UpdateThread(Thread):
     def __init__(self, token, mobile):
