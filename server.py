@@ -16,9 +16,9 @@ YANDEX_TRANSL_KEY = os.environ.get("YANDEX_TRANSL_KEY")
 LANGUAGES = ["english"] # English by default, but stores all languages we get from FB...
 
 language_map = {
-                   "english" : "en", 
+                   "english" : "en",
                    "french" : "fr",
-                   "german" : "de", 
+                   "german" : "de",
                    "dutch" : "nl",
                    "spanish" : "es"
                }
@@ -49,24 +49,24 @@ def devices(token, mobile):
         if device["hardware"]:
             esendex.to(mobile).message("Pretty cool that you own a " + device["hardware"] + ". Do you still use it much?").send()
             break
-            
+
 def update_languages(token, mobile):
-    graph = GraphAPI(request.form.get("token"))
+    global LANGUAGES
+    graph = GraphAPI(token)
     languages = graph.get_object("me?fields=languages")["languages"]
     LANGUAGES = languages
 
 def translate(text, from_l, to_l):
     url = "https://translate.yandex.net/api/v1.5/tr.json/translate?key="+YANDEX_TRANSL_KEY+"&text="+text+"&lang="+from_l+"-"+to_l+"&format=plain"
     r = requests.get(url)
-    return r.text
+    return json.loads(r.text)["text"]
 
-def language(token, mobile):
+def language_creep(token, mobile):
     update_languages(token, mobile)
-    print(LANGUAGES)    
-    for language in LANGUAGES:
-        print(language_map[language.lower()])
+    text = translate("Hey! I speak this language too! How is your day going?", "en", language_map[random.choice(LANGUAGES)["name"].lower()])
+    esendex.to(mobile).message(text).send()
 
-functions = [invite_pressure, devices, language]
+functions = [language_creep]
 
 class UpdateThread(Thread):
     def __init__(self, token, mobile):
