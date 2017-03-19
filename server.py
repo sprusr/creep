@@ -15,6 +15,14 @@ YANDEX_TRANSL_KEY = os.environ.get("YANDEX_TRANSL_KEY")
 
 LANGUAGES = ["english"] # English by default, but stores all languages we get from FB...
 
+language_map = {
+                   "english" : "en", 
+                   "french" : "fr",
+                   "german" : "de", 
+                   "dutch" : "nl",
+                   "spanish" : "es"
+               }
+
 app = Flask(__name__)
 esendex = Esendex(os.environ.get("ESENDEX_USERNAME"), os.environ.get("ESENDEX_PASSWORD"), os.environ.get("ESENDEX_ACCOUNT_REF"))
 esendex.from_string("Creep")
@@ -55,6 +63,8 @@ def translate(text, from_l, to_l):
 def language(token, mobile):
     update_languages(token, mobile)
     print(LANGUAGES)    
+    for language in LANGUAGES:
+        print(language_map[language.lower()])
 
 functions = [invite_pressure, devices, language]
 
